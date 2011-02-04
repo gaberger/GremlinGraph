@@ -66,27 +66,33 @@ def kary(k, h) {
   Graph g = new Neo4jGraph('/tmp/neo4')
 
 //Create vertices
-  for (i in 1..h) {
+  for (i in 1..h) { // Create a tree
     for (a in 1..k) {
       Vertex x = g.addVertex(null)
       x.setProperty("name", i + "," + a)
       x.setProperty("type", i)
+
+      if (i == 1) {
+        x.setProperty("devclass", "SPINE")
+      }
+      if (i == 2) {
+        x.setProperty("devclass", "LEAF")
+      }
       // x.setProperty("type", "spine")
     }
   } //h*k
 
   //Connect tree
-  for (j in 1..h - 1) {   // Each tree level
-    for (Vertex v: g.V[[type: j]]) {
-      for (l in 1..k) {
-        for (Vertex w: g.V[[type: j + 1]]) {
+    for (Vertex v: g.V[[devclass: "SPINE"]]) {
+        for (Vertex w: g.V[[devclass: "LEAF"]]) {
           if (v != w) {
-            g.addEdge(null, w, v, "link")
+            z = g.addEdge(null, w, v, "link")
+            z.setProperty("cost", "n")
+
           }
-        }
       }
     }
-  }
+
 //
 
 //Create nodes and connect to leaf switches
@@ -97,17 +103,20 @@ def kary(k, h) {
       Vertex x = g.addVertex(null)
       x.setProperty("name", "computeNode")
       x.setProperty("type", h + 1)
+      x.setProperty("devclass", "NODE")
       g.addEdge(null, v, x, 'link')
     }
-
-
   }
+
+
+
 
 
 
 
   GraphMLWriter.outputGraph(g, new FileOutputStream("/tmp/graph-example-2.graphml"))
   g.shutdown();
+
 }
 
 //  //Full mesh
@@ -156,8 +165,8 @@ def bcube(k, h) {
   }
 
 
-    for (Vertex w: g.V[[type: 3]]) {
-      for (Vertex v: g.V[[type: 1]]) { // get a spine
+  for (Vertex w: g.V[[type: 3]]) {
+    for (Vertex v: g.V[[type: 1]]) { // get a spine
       g.addEdge(null, v, w, "backbonelink")
 
     }
