@@ -1,10 +1,11 @@
+package com.cisco.graph
+
 import com.tinkerpop.gremlin.Gremlin
-import com.tinkerpop.blueprints.pgm.impls.tg.TinkerGraphFactory
+
 import com.tinkerpop.blueprints.pgm.impls.neo4j.Neo4jGraph
 import com.tinkerpop.blueprints.pgm.Graph
 import com.tinkerpop.blueprints.pgm.Vertex
 import com.tinkerpop.blueprints.pgm.util.graphml.GraphMLWriter
-import com.tinkerpop.blueprints.pgm.Index
 
 //max nodes
 //k**h
@@ -13,7 +14,10 @@ import com.tinkerpop.blueprints.pgm.Index
 
 // bcube n=number of nodes in a BCube, k=number of levels, Level 0 = spine
 //bcube(n,k)
-bcube(8, 1)
+//bcube(8, 1)
+//kary(n,k)
+//kary(8,2)
+
 
 //def tree(k, h) {
 //  Gremlin.load()
@@ -61,51 +65,51 @@ bcube(8, 1)
 //}
 
 
+class NetworkService{
 
-
-def kary(k, h) {
+def kary(n, k) {
   Gremlin.load()
   Graph g = new Neo4jGraph('/tmp/neo4')
 
 //Create vertices
-  for (i in 1..h) { // Create a tree
-    for (a in 1..k) {
-      Vertex x = g.addVertex(null)
-      x.setProperty("name", i + "," + a)
-      x.setProperty("type", i)
 
-      if (i == 1) {
-        x.setProperty("devclass", "SPINE")
+  for (a in 0..k-1) {
+    for (b in 0..n - 1) {
+      Vertex x = g.addVertex(null)
+      def id = "${a},${b}"
+      x.setProperty("name", id.toString())
+      x.setProperty("level", a)
+      x.setProperty("slot", b)
+      if (x.level == 0) {
+        x.setProperty("type", "LEAF")
       }
-      if (i == 2) {
-        x.setProperty("devclass", "LEAF")
+      if (x.level == 1){
+        x.setProperty("type", "SPINE")
       }
-      // x.setProperty("type", "spine")
     }
-  } //h*k
+  }
+
 
   //Connect tree
-  for (Vertex v: g.V[[devclass: "SPINE"]]) {
-    for (Vertex w: g.V[[devclass: "LEAF"]]) {
+  for (Vertex v: g.V[[type: "SPINE"]]) {
+    for (Vertex w: g.V[[type: "LEAF"]]) {
       if (v != w) {
         z = g.addEdge(null, w, v, "link")
         z.setProperty("cost", "n")
+        z.setProperty("inport", v.name)
+        z.setProperty("outport", w.name)
 
       }
     }
   }
 
-//
 
-//Create nodes and connect to leaf switches
-
-  for (Vertex v: g.V[[type: h]]) {    //get a leaf node
+  for (Vertex v: g.V[[level: k-2]]) {    //get a leaf node
     //add Nodes
-    for (a in 1..k) {
+    for (a in 0..n-1) {
       Vertex x = g.addVertex(null)
       x.setProperty("name", "computeNode")
-      x.setProperty("type", h + 1)
-      x.setProperty("devclass", "NODE")
+      x.setProperty("type", "NODE")
       g.addEdge(null, v, x, 'link')
     }
   }
@@ -189,4 +193,5 @@ def bcube(n, k) {
   GraphMLWriter.outputGraph(g, new FileOutputStream("/tmp/graph-example-2.graphml"))
   g.shutdown();
 
+}
 }

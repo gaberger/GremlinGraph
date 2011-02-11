@@ -50,6 +50,7 @@
     <orderEntry type="library" name="Maven: org.neo4j:neo4j-ha:0.5-1.2" level="project" />
     <orderEntry type="library" name="Maven: org.apache.zookeeper:zookeeper:3.3.2" level="project" />
     <orderEntry type="library" name="Maven: org.jboss.netty:netty:3.2.1.Final" level="project" />
+    <orderEntry type="library" name="Gigaspaces" level="project" />
   </component>
 </module>
 
