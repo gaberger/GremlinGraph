@@ -19,52 +19,6 @@ import com.tinkerpop.blueprints.pgm.util.graphml.GraphMLWriter
 //kary(8,2)
 
 
-//def tree(k, h) {
-//  Gremlin.load()
-//  Graph g = new Neo4jGraph('/tmp/neo4')
-//
-////create spine first
-//  for (a in 1..k) {
-//    Vertex x = g.addVertex(null)
-//    x.setProperty("name", "SNode${a}".toString())
-//    x.setProperty("type", "spine")
-//  }
-//
-////create leaf
-//  for (a in 1..k) {
-//    Vertex x = g.addVertex(null)
-//    x.setProperty("name", "LNode")
-//    x.setProperty("type", "leaf")
-//  }
-//
-////Connect leaf to spine
-//
-//  for (Vertex v: g.V[[type: 'spine']]) {
-//    for (Vertex w: g.V[[type: 'leaf']]) {
-//      g.addEdge(null, v, w, "link-s")
-//    }
-//  }
-//
-////Create nodes and connect to leaf switches
-//
-//  for (Vertex v: g.V[[type: 'leaf']]) {    //get a leaf node
-//    //add Nodes
-//    for (a in 1..k) {
-//      Vertex x = g.addVertex(null)
-//      x.setProperty("name", "PNode")
-//      x.setProperty("type", "computeNode")
-//      g.addEdge(null, x, v, 'link')
-//    }
-//
-//
-//  }
-//
-//
-//  GraphMLWriter.outputGraph(g, new FileOutputStream("/tmp/graph-example-2.graphml"))
-//  g.shutdown();
-//}
-
-
 class NetworkService{
 
 def kary(n, k) {
@@ -76,15 +30,15 @@ def kary(n, k) {
   for (a in 0..k-1) {
     for (b in 0..n - 1) {
       Vertex x = g.addVertex(null)
-      def id = "${a},${b}"
-      x.setProperty("name", id.toString())
-      x.setProperty("level", a)
-      x.setProperty("slot", b)
+      def id  = "${a},${b}"
+      x.name  =  id.toString()
+      x.level =  a
+      x.slot  =  b
       if (x.level == 0) {
-        x.setProperty("type", "LEAF")
+        x.type =  "LEAF"
       }
       if (x.level == 1){
-        x.setProperty("type", "SPINE")
+        x.type = "SPINE"
       }
     }
   }
@@ -94,10 +48,10 @@ def kary(n, k) {
   for (Vertex v: g.V[[type: "SPINE"]]) {
     for (Vertex w: g.V[[type: "LEAF"]]) {
       if (v != w) {
-        z = g.addEdge(null, w, v, "link")
-        z.setProperty("cost", "n")
-        z.setProperty("inport", v.name)
-        z.setProperty("outport", w.name)
+        def z = g.addEdge(null, w, v, "link")
+        z.cost    =  "n"
+        z.inport  =  v.name
+        z.outport =  w.name
 
       }
     }
@@ -108,8 +62,9 @@ def kary(n, k) {
     //add Nodes
     for (a in 0..n-1) {
       Vertex x = g.addVertex(null)
-      x.setProperty("name", "computeNode")
-      x.setProperty("type", "NODE")
+      x.name = "computeNode"
+      x.type = "NODE"
+      x.addr = "1.1.1.1"
       g.addEdge(null, v, x, 'link')
     }
   }
@@ -150,13 +105,14 @@ def bcube(n, k) {
     for (b in 0..n - 1) {
       Vertex x = g.addVertex(null)
       def id = "${a},${b}"
-      x.setProperty("name", id.toString())
-      x.setProperty("level", a)
-      x.setProperty("slot", b)
+
+      x.name  = id.toString()
+      x.level = a
+      x.slot  = b
       if (x.level == 0) {
-        x.setProperty("type", "LEAF")
+        x.type = "LEAF"
       } else {
-        x.setProperty("type", "SPINE")
+        x.type = "SPINE"
       }
     }
   }
@@ -167,9 +123,9 @@ def bcube(n, k) {
     for (def a in 0..n ** k - 1) {
       //for (def b in 0..n ** k - 1) {
       Vertex x = g.addVertex(null)
-      x.setProperty("name", "${v.slot}${a}".toString())
-      x.setProperty("type", "NODE")
-      x.setProperty("slot", a)
+      x.name = "${v.slot}${a}".toString()
+      x.type = "NODE"
+      x.slot =  a
       g.addEdge(null, v, x, 'link')
 
       //}
