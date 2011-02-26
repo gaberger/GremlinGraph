@@ -19,135 +19,189 @@ import com.tinkerpop.blueprints.pgm.util.graphml.GraphMLWriter
 //kary(8,2)
 
 
-class NetworkService{
+class NetworkService {
 
-def kary(n, k) {
-  Gremlin.load()
-  Graph g = new Neo4jGraph('/tmp/neo4')
+    //  param n = number of nodes
+    public void createRing(graphService, numOfNodes) {
 
-//Create vertices
+        println("EVENT | createRing | STARTED");
+        println "VAR   | numofNodes= ${numOfNodes}"
 
-  for (a in 0..k-1) {
-    for (b in 0..n - 1) {
-      Vertex x = g.addVertex(null)
-      def id  = "${a},${b}"
-      x.name  =  id.toString()
-      x.level =  a
-      x.slot  =  b
-      if (x.level == 0) {
-        x.type =  "LEAF"
-      }
-      if (x.level == 1){
-        x.type = "SPINE"
-      }
+        //create Nodes
+        for (a in 0..(numOfNodes - 1)) {
+            Vertex vertex = graphService.addVertex(null)
+            vertex.type = "NODE"
+        }
+
+           for (Vertex x in graphService.V[[type: "NODE"]]) {
+                x.each{
+                    println it.id
+                }
+              if(x.id ==1)   {println "ID | 1"}
+
+
+                   //graphService.addEdge(null, x[5], x[1], "external-link")
+                }
+
+
     }
-  }
 
+    def createStar(graphService, n, k) {
+               println("EVENT | createStar | STARTED");
 
-  //Connect tree
-  for (Vertex v: g.V[[type: "SPINE"]]) {
-    for (Vertex w: g.V[[type: "LEAF"]]) {
-      if (v != w) {
-        def z = g.addEdge(null, w, v, "link")
-        z.cost    =  "n"
-        z.inport  =  v.name
-        z.outport =  w.name
-
-      }
     }
-  }
 
 
-  for (Vertex v: g.V[[level: k-2]]) {    //get a leaf node
-    //add Nodes
-    for (a in 0..n-1) {
-      Vertex x = g.addVertex(null)
-      x.name = "computeNode"
-      x.type = "NODE"
-      x.addr = "1.1.1.1"
-      g.addEdge(null, v, x, 'link')
+
+    public void createKary(g, n, k) {
+         println("EVENT | createKary | STARTED");
+
+
+        for (a in 0..k - 1) {       //Create vertices
+            for (b in 0..n - 1) {
+                Vertex x = g.addVertex(null)
+                def id = "${a},${b}"
+                x.name = id.toString()
+                x.level = a
+                x.slot = b
+                if (x.level == 0) {
+                    x.type = "LEAF"
+                }
+                if (x.level == 1) {
+                    x.type = "SPINE"
+                }
+            }
+        }
+
+        //Connect tree
+        for (Vertex v: g.V[[type: "SPINE"]]) {
+            for (Vertex w: g.V[[type: "LEAF"]]) {
+                if (v != w) {
+                    def z = g.addEdge(null, w, v, "link")
+                    z.cost = "n"
+                    z.inport = v.name
+                    z.outport = w.name
+                    z.type = "Backbone"
+
+                }
+            }
+        }
+
+
+        for (Vertex v: g.V[[level: k - 2]]) {    //get a leaf node
+            //add Nodes
+            for (a in 0..n - 1) {
+                Vertex x = g.addVertex(null)
+                x.name = "computeNode"
+                x.type = "NODE"
+                def addr = "1.1.1.${v.slot}"
+                x.addr = addr.toString()
+                def z = g.addEdge(null, v, x, 'link')
+                z.type = "NodeLink"
+            }
+        }
     }
-  }
 
 
 
-
-
-
-
-  GraphMLWriter.outputGraph(g, new FileOutputStream("/tmp/graph-example-2.graphml"))
-  g.shutdown();
-
-}
-
-//  //Full mesh
-//  for (j in 1..h - 1) {   // Each tree level
-//    for (Vertex v: g.V[[type: j]]) {
-//      for (l in 1..k) {
-//        for (Vertex w: g.V[[type: j + 1]]) {
-//          if (v != w) {
-//            g.addEdge(null, v, w, "link")
-//          }
-//        }
-//      }
-//    }
-//  }
-
-
-def bcube(n, k) {
-  Gremlin.load()
-  Graph g = new Neo4jGraph('/tmp/neo4')
+    public void createBcube(n, k) {
 
 //Create switch vertices
 
 
-  for (a in 0..k) {
-    for (b in 0..n - 1) {
-      Vertex x = g.addVertex(null)
-      def id = "${a},${b}"
+        for (a in 0..k) {
+            for (b in 0..n - 1) {
+                Vertex x = g.addVertex(null)
+                def id = "${a},${b}"
 
-      x.name  = id.toString()
-      x.level = a
-      x.slot  = b
-      if (x.level == 0) {
-        x.type = "LEAF"
-      } else {
-        x.type = "SPINE"
-      }
+                x.name = id.toString()
+                x.level = a
+                x.slot = b
+                if (x.level == 0) {
+                    x.type = "LEAF"
+                } else {
+                    x.type = "SPINE"
+                }
+            }
+        }
+
+
+
+        for (Vertex v in g.V[[level: k - 1]]) {
+            for (def a in 0..n ** k - 1) {
+                //for (def b in 0..n ** k - 1) {
+                Vertex x = g.addVertex(null)
+                x.name = "${v.slot}${a}".toString()
+                x.type = "NODE"
+                x.slot = a
+                g.addEdge(null, v, x, 'link')
+
+                //}
+            }
+
+        }
+
+
+
+        for (Vertex v in g.V[[type: "SPINE"]]) {
+            for (Vertex x in g.V[[type: "NODE"]]) {
+                if (v.slot == x.slot) {
+                    g.addEdge(null, v, x, "external-link")
+                }
+            }
+        }
+
+
+
+
+        GraphMLWriter.outputGraph(g, new FileOutputStream("/tmp/graph-example-2.graphml"))
+        g.shutdown();
+
     }
-  }
 
 
 
-  for (Vertex v in g.V[[level: k - 1]]) {
-    for (def a in 0..n ** k - 1) {
-      //for (def b in 0..n ** k - 1) {
-      Vertex x = g.addVertex(null)
-      x.name = "${v.slot}${a}".toString()
-      x.type = "NODE"
-      x.slot =  a
-      g.addEdge(null, v, x, 'link')
+    def exportML(graph) {
+        GraphMLWriter.outputGraph(graph, new FileOutputStream("/tmp/graph-example-2.graphml"))
 
-      //}
     }
 
-  }
 
 
 
-  for (Vertex v in g.V[[type: "SPINE"]]) {
-    for (Vertex x in g.V[[type: "NODE"]]){
-      if (v.slot == x.slot) {
-        g.addEdge(null, v, x, "external-link")
-      }
+
+
+
+
+
+
+
+    interface createNetwork {
+        def types = ["kary", "bcube", "hypcube"]
     }
-  }
+
+    interface createForwardingDevice {
+
+    }
+
+
+    def getVertexAll(graphService) {
+      println("EVENT | getVertexAll | STARTED");
+         for (Vertex v: graphService.V) {
+            println v.id
+            println v.type
 
 
 
+        }
+    }
 
-  GraphMLWriter.outputGraph(g, new FileOutputStream("/tmp/graph-example-2.graphml"))
-  g.shutdown();
 
-}
+    def getNodes(def nodeindex, def type) {
+
+
+        def x = g.V[nodeindex].outE[[type: type]].inV.addr
+        println x
+    }
+
 }

@@ -11,6 +11,7 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="groovy-1.7.6" level="application" />
     <orderEntry type="library" name="Gremlin" level="project" />
+    <orderEntry type="library" name="Gigaspaces" level="project" />
     <orderEntry type="library" name="Maven: com.tinkerpop:pipes:0.3" level="project" />
     <orderEntry type="library" name="Maven: com.tinkerpop:blueprints:0.4" level="project" />
     <orderEntry type="library" name="Maven: com.googlecode.json-simple:json-simple:1.1" level="project" />
@@ -50,7 +51,6 @@
     <orderEntry type="library" name="Maven: org.neo4j:neo4j-ha:0.5-1.2" level="project" />
     <orderEntry type="library" name="Maven: org.apache.zookeeper:zookeeper:3.3.2" level="project" />
     <orderEntry type="library" name="Maven: org.jboss.netty:netty:3.2.1.Final" level="project" />
-    <orderEntry type="library" name="Gigaspaces" level="project" />
   </component>
 </module>
 
