@@ -14,7 +14,7 @@ class GraphService {
 
     }
 
-    public initGraphService(db) {
+    public init(db) {
         println "EVENT | Bringing up Neo4j | ${db}"
         def graphService = new Neo4jGraph(db)
 

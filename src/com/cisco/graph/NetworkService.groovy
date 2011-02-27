@@ -28,33 +28,38 @@ class NetworkService {
         println "VAR   | numofNodes= ${numOfNodes}"
 
         //create Nodes
-        for (a in 0..(numOfNodes - 1)) {
+        for (a in 1..(numOfNodes)) {
             Vertex vertex = graphService.addVertex(null)
             vertex.type = "NODE"
         }
 
-           for (Vertex x in graphService.V[[type: "NODE"]]) {
-                x.each{
-                    println it.id
-                }
-              if(x.id ==1)   {println "ID | 1"}
+        def firstNode = graphService.v(1)
+        def lastNode = graphService.v(numOfNodes)
+        def edge = graphService.addEdge(null, lastNode, firstNode, "link")
+
+        for (a in 1..numOfNodes-1){
+            def x = graphService.v(a)
+            def y = graphService.v(a+1)
+            graphService.addEdge(null, x, y, "link")
+        }
 
 
-                   //graphService.addEdge(null, x[5], x[1], "external-link")
-                }
+
+            //graphService.addEdge(null, x[5], x[1], "external-link")
+
 
 
     }
 
     def createStar(graphService, n, k) {
-               println("EVENT | createStar | STARTED");
+        println("EVENT | createStar | STARTED");
 
     }
 
 
 
     public void createKary(g, n, k) {
-         println("EVENT | createKary | STARTED");
+        println("EVENT | createKary | STARTED");
 
 
         for (a in 0..k - 1) {       //Create vertices
@@ -162,6 +167,7 @@ class NetworkService {
 
 
     def exportML(graph) {
+         println "EVENT | exportML | ${graph}"
         GraphMLWriter.outputGraph(graph, new FileOutputStream("/tmp/graph-example-2.graphml"))
 
     }
@@ -186,11 +192,10 @@ class NetworkService {
 
 
     def getVertexAll(graphService) {
-      println("EVENT | getVertexAll | STARTED");
-         for (Vertex v: graphService.V) {
+        println("EVENT | getVertexAll | STARTED");
+        for (Vertex v: graphService.V) {
             println v.id
             println v.type
-
 
 
         }
