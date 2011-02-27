@@ -1,22 +1,13 @@
 package com.cisco.graph
 
-import com.tinkerpop.gremlin.Gremlin
 
-import com.tinkerpop.blueprints.pgm.impls.neo4j.Neo4jGraph
-import com.tinkerpop.blueprints.pgm.Graph
 import com.tinkerpop.blueprints.pgm.Vertex
-import com.tinkerpop.blueprints.pgm.util.graphml.GraphMLWriter
 
 //max nodes
 //k**h
 
 //kary(4, 2)
 
-// bcube n=number of nodes in a BCube, k=number of levels, Level 0 = spine
-//bcube(n,k)
-//bcube(8, 1)
-//kary(n,k)
-//kary(8,2)
 
 
 class NetworkService {
@@ -37,16 +28,13 @@ class NetworkService {
         def lastNode = graphService.v(numOfNodes)
         def edge = graphService.addEdge(null, lastNode, firstNode, "link")
 
-        for (a in 1..numOfNodes-1){
+        for (a in 1..numOfNodes - 1) {
             def x = graphService.v(a)
-            def y = graphService.v(a+1)
+            def y = graphService.v(a + 1)
             graphService.addEdge(null, x, y, "link")
         }
 
-
-
-            //graphService.addEdge(null, x[5], x[1], "external-link")
-
+        //graphService.addEdge(null, x[5], x[1], "external-link")
 
 
     }
@@ -109,14 +97,15 @@ class NetworkService {
 
 
 
-    public void createBcube(n, k) {
+    public void createBcube(graphService, n, k) {
+        println("EVENT | createBcube | STARTED");
 
 //Create switch vertices
 
 
         for (a in 0..k) {
             for (b in 0..n - 1) {
-                Vertex x = g.addVertex(null)
+                Vertex x = graphService.addVertex(null)
                 def id = "${a},${b}"
 
                 x.name = id.toString()
@@ -132,14 +121,14 @@ class NetworkService {
 
 
 
-        for (Vertex v in g.V[[level: k - 1]]) {
+        for (Vertex v in graphService.V[[level: k - 1]]) {
             for (def a in 0..n ** k - 1) {
                 //for (def b in 0..n ** k - 1) {
-                Vertex x = g.addVertex(null)
+                Vertex x = graphService.addVertex(null)
                 x.name = "${v.slot}${a}".toString()
                 x.type = "NODE"
                 x.slot = a
-                g.addEdge(null, v, x, 'link')
+                graphService.addEdge(null, v, x, 'link')
 
                 //}
             }
@@ -148,34 +137,16 @@ class NetworkService {
 
 
 
-        for (Vertex v in g.V[[type: "SPINE"]]) {
-            for (Vertex x in g.V[[type: "NODE"]]) {
+        for (Vertex v in graphService.V[[type: "SPINE"]]) {
+            for (Vertex x in graphService.V[[type: "NODE"]]) {
                 if (v.slot == x.slot) {
-                    g.addEdge(null, v, x, "external-link")
+                    graphService.addEdge(null, v, x, "external-link")
                 }
             }
         }
 
 
-
-
-        GraphMLWriter.outputGraph(g, new FileOutputStream("/tmp/graph-example-2.graphml"))
-        g.shutdown();
-
     }
-
-
-
-    def exportML(graph) {
-         println "EVENT | exportML | ${graph}"
-        GraphMLWriter.outputGraph(graph, new FileOutputStream("/tmp/graph-example-2.graphml"))
-
-    }
-
-
-
-
-
 
 
 

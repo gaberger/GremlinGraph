@@ -28,13 +28,18 @@ class GraphService {
         graphService.shutdown();
     }
 
-    public void cleanDB(directory){
+    public void cleanDB(directory) {
         println("EVENT | CLEANING DB | ${directory}");
         def dir = new File(directory)
         dir.deleteDir()
 
     }
 
+    public void exportML(graph) {
+        println "EVENT | exportML | ${graph}"
+        GraphMLWriter.outputGraph(graph, new FileOutputStream("/tmp/graph-example-2.graphml"))
+
+    }
 
 
 }
