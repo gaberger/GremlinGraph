@@ -16,7 +16,7 @@ class NetworkService {
     public void createRing(graphService, numOfNodes) {
 
         println("EVENT | createRing | STARTED");
-        println "VAR   | numofNodes= ${numOfNodes}"
+        println "VAR   | numofNodes | ${numOfNodes}"
 
         //create Nodes
         for (a in 1..(numOfNodes)) {
@@ -33,9 +33,6 @@ class NetworkService {
             def y = graphService.v(a + 1)
             graphService.addEdge(null, x, y, "link")
         }
-
-        //graphService.addEdge(null, x[5], x[1], "external-link")
-
 
     }
 
@@ -165,10 +162,7 @@ class NetworkService {
     def getVertexAll(graphService) {
         println("EVENT | getVertexAll | STARTED");
         for (Vertex v: graphService.V) {
-            println v.id
-            println v.type
-
-
+            println "ID: ${v.id} TYPE: ${v.type}"
         }
     }
 
