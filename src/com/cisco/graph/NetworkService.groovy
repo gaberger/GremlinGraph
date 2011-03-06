@@ -36,8 +36,21 @@ class NetworkService {
 
     }
 
-    def createStar(graphService, n, k) {
+    def createStar(graphService, n) {
         println("EVENT | createStar | STARTED");
+
+        for (a in 0..n - 1) {
+            Vertex vertex = graphService.addVertex(null)
+        }
+        def anchorNode = graphService.v(1)
+        anchorNode.type = "SPINE"
+
+        for (a in 2..n) {
+            def x = graphService.v(1)
+            def y = graphService.v(a)
+            y.type = "NODE"
+            graphService.addEdge(null, x, y, "link")
+        }
 
     }
 
@@ -141,6 +154,80 @@ class NetworkService {
                 }
             }
         }
+
+
+    }
+
+    public void sampleNetwork(graphService) {
+        def ip = ["192.168.1", "192.168.2", "192.168.3", "192.168.4"]
+        def r = new Random()
+
+        //Create a random set of nodes in each subnet
+        def nodes = r.nextInt(15)
+        ip.each {
+            println "Creating nodes for subnet ${it}"
+            for (a in 1..nodes) {
+                Vertex vx = graphService.addVertex(null)
+                def nodeAddr = r.nextInt(256)
+                vx.name = "${it}.${nodeAddr}".toString()
+                vx.network = it
+                vx.nodeAddr = nodeAddr
+            }
+        }
+
+//        //Connect all subnet nodes
+//        ip.each {
+//            println "Created subnet connections for ${it}"
+//        for (Vertex v in graphService.V[[network: it]]) {
+//            for (Vertex x in graphService.V[[network: it]]) {
+//                if (v.name != x.name) {
+//                    graphService.addEdge(null, v, x, "subnet-link")
+//                }
+//            }
+//        }
+//        }
+
+        //Only want to show node connections to Vertex with connections across subnets?
+        //pick a random vertex in each subnet
+        def glist = []
+        ip.each {
+            println "Scanning network ${it}"
+             for (Vertex v in graphService.V[[network: it]]) {
+                 println "Possible node candidate ${v.nodeAddr}"
+                     glist.add(v)
+                 break
+
+
+             }
+
+
+        }
+
+
+
+
+             // println "Am I getting a vertex here: ${v.name}"
+
+
+
+        glist.each{
+            println "Picked random nodes: ${it.name}"
+
+        }
+
+
+      //Pick a random set of vertexes within each subnet
+        //loop count
+//        for (a in 0.1000) {
+//            for (Vertex v in graphService.V[[network: ip[r.nextInt(ip.size())]]]) {
+//                for (Vertex w in graphService.V[[network: ip[r.nextInt(ip.size())]]]) {
+//                    if (v.name != w.name) {
+//                        graphService.addEdge(null, v, w, "Link")
+//                    }
+//                }
+//
+//            }
+//        }
 
 
     }
