@@ -163,8 +163,9 @@ class NetworkService {
         def r = new Random()
 
         //Create a random set of nodes in each subnet
-        def nodes = r.nextInt(15)
+        def seed = 15
         ip.each {
+            def nodes = r.nextInt(seed)
             println "Creating nodes for subnet ${it}"
             for (a in 1..nodes) {
                 Vertex vx = graphService.addVertex(null)
@@ -172,6 +173,7 @@ class NetworkService {
                 vx.name = "${it}.${nodeAddr}".toString()
                 vx.network = it
                 vx.nodeAddr = nodeAddr
+                vx.role = "Access"
             }
         }
 
@@ -192,32 +194,53 @@ class NetworkService {
         def glist = []
         ip.each {
             println "Scanning network ${it}"
-             for (Vertex v in graphService.V[[network: it]]) {
-                 println "Possible node candidate ${v.nodeAddr}"
-                     glist.add(v)
-                 break
-
-
-             }
-
-
+            for (Vertex v in graphService.V[[network: it]]) {
+                println "Possible node candidate ${v.nodeAddr}"
+                v.role = "Gateway"
+                glist.add(v)
+                break
+            }
         }
 
 
 
 
-             // println "Am I getting a vertex here: ${v.name}"
+        //Connect sub-net nodes to Gateway
 
+        glist.each {
+            println "Picked random nodes: ${it.name} on network ${it.network}"
 
+            for (Vertex v in graphService.V[[network: it.network]]) {
+                if (v.name != it.name) {
+                    graphService.addEdge(null, v, it, "Subnet-Link")
 
-        glist.each{
-            println "Picked random nodes: ${it.name}"
+                }
 
+            }
+        }
+        //connect all Gateway Nodes
+
+        for (Vertex v in graphService.V[[role: "Gateway"]]) {
+            for (Vertex w in graphService.V[[role: "Gateway"]]) {
+                if (v.name != w.name){
+                    graphService.addEdge(null, v, w, "Gateway-Link")
+                }
+            }
         }
 
+        //connect random Gateway nodes
+//        glist = []
+//        ip.each {
+//            println "Scanning network ${it}"
+//            println graphService.V[graphService:rand-nat()]
+//
+////            for (Vertex v in g[graphService:rand-nat()]) {
+////                println "Possible Gateway candidate ${v.nodeAddr}"
+////            }
+//        }
 
-      //Pick a random set of vertexes within each subnet
-        //loop count
+            //Pick a random set of vertexes within each subnet
+            //loop count
 //        for (a in 0.1000) {
 //            for (Vertex v in graphService.V[[network: ip[r.nextInt(ip.size())]]]) {
 //                for (Vertex w in graphService.V[[network: ip[r.nextInt(ip.size())]]]) {
@@ -230,35 +253,35 @@ class NetworkService {
 //        }
 
 
-    }
-
-
-
-
-
-
-    interface createNetwork {
-        def types = ["kary", "bcube", "hypcube"]
-    }
-
-    interface createForwardingDevice {
-
-    }
-
-
-    def getVertexAll(graphService) {
-        println("EVENT | getVertexAll | STARTED");
-        for (Vertex v: graphService.V) {
-            println "ID: ${v.id} TYPE: ${v.type}"
         }
+
+
+
+
+
+
+        interface createNetwork {
+            def types = ["kary", "bcube", "hypcube"]
+        }
+
+        interface createForwardingDevice {
+
+        }
+
+
+        def getVertexAll(graphService) {
+            println("EVENT | getVertexAll | STARTED");
+            for (Vertex v: graphService.V) {
+                println "ID: ${v.id} TYPE: ${v.type}"
+            }
+        }
+
+
+        def getNodes(def nodeindex, def type) {
+
+
+            def x = g.V[nodeindex].outE[[type: type]].inV.addr
+            println x
+        }
+
     }
-
-
-    def getNodes(def nodeindex, def type) {
-
-
-        def x = g.V[nodeindex].outE[[type: type]].inV.addr
-        println x
-    }
-
-}
