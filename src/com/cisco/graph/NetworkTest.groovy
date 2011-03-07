@@ -13,6 +13,10 @@ def db = graphService.init(neodb)
 
 networkService.sampleNetwork(db)
 
+
+
+
+
 //networkService.createKary(db, 12,2)
 //networkService.createStar(db,10)
 //networkService.createRing(db, 25)

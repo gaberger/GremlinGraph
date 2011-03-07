@@ -2,6 +2,9 @@ package com.cisco.graph
 
 
 import com.tinkerpop.blueprints.pgm.Vertex
+import java.security.MessageDigest
+
+
 
 //max nodes
 //k**h
@@ -11,6 +14,8 @@ import com.tinkerpop.blueprints.pgm.Vertex
 
 
 class NetworkService {
+
+
 
     //  param n = number of nodes
     public void createRing(graphService, numOfNodes) {
@@ -163,14 +168,16 @@ class NetworkService {
         def r = new Random()
 
         //Create a random set of nodes in each subnet
-        def seed = 15
+        def seed = 20
         ip.each {
             def nodes = r.nextInt(seed)
             println "Creating nodes for subnet ${it}"
             for (a in 1..nodes) {
                 Vertex vx = graphService.addVertex(null)
-                def nodeAddr = r.nextInt(256)
-                vx.name = "${it}.${nodeAddr}".toString()
+                def nodeAddr = r.nextInt(254)
+                def nodeName = "${it}.${nodeAddr}"
+                vx.nodeHash =  calcHash(nodeName.toString())
+                vx.nodeName = nodeName.toString()
                 vx.network = it
                 vx.nodeAddr = nodeAddr
                 vx.role = "Access"
@@ -202,16 +209,13 @@ class NetworkService {
             }
         }
 
-
-
-
         //Connect sub-net nodes to Gateway
 
         glist.each {
-            println "Picked random nodes: ${it.name} on network ${it.network}"
+            println "Picked random nodes: ${it.nodeName} on network ${it.network}"
 
             for (Vertex v in graphService.V[[network: it.network]]) {
-                if (v.name != it.name) {
+                if (v.nodeName != it.nodeName) {
                     graphService.addEdge(null, v, it, "Subnet-Link")
 
                 }
@@ -222,7 +226,7 @@ class NetworkService {
 
         for (Vertex v in graphService.V[[role: "Gateway"]]) {
             for (Vertex w in graphService.V[[role: "Gateway"]]) {
-                if (v.name != w.name){
+                if (v.nodeName != w.nodeName) {
                     graphService.addEdge(null, v, w, "Gateway-Link")
                 }
             }
@@ -239,8 +243,8 @@ class NetworkService {
 ////            }
 //        }
 
-            //Pick a random set of vertexes within each subnet
-            //loop count
+        //Pick a random set of vertexes within each subnet
+        //loop count
 //        for (a in 0.1000) {
 //            for (Vertex v in graphService.V[[network: ip[r.nextInt(ip.size())]]]) {
 //                for (Vertex w in graphService.V[[network: ip[r.nextInt(ip.size())]]]) {
@@ -253,35 +257,53 @@ class NetworkService {
 //        }
 
 
+    }
+
+
+
+
+
+
+    interface createNetwork {
+        def types = ["kary", "bcube", "hypcube"]
+    }
+
+    interface createForwardingDevice {
+
+    }
+
+
+    def getVertexAll(graphService) {
+        println("EVENT | getVertexAll | STARTED");
+        for (Vertex v: graphService.V) {
+            println "ID: ${v.id} HASH:${v.nodeHash}"
         }
+    }
 
 
+    def getNodes(def nodeindex, def type) {
 
 
+        def x = g.V[nodeindex].outE[[type: type]].inV.addr
+        println x
+    }
+
+    public calcHash(String source) {
+
+           def messageDigest = MessageDigest.getInstance("SHA1")
+            messageDigest.update( source.getBytes() );
+
+            def sha1Hex = new BigInteger(1, messageDigest.digest()).toString(16).padLeft( 40, '0' )
+
+            return sha1Hex
+                        /*
+            * Why pad up to 40 characters? Because SHA-1 has an output
+            * size of 160 bits. Each hexadecimal character is 4-bits.
+            * 160 / 4 = 40
+            */
 
 
-        interface createNetwork {
-            def types = ["kary", "bcube", "hypcube"]
-        }
+    }
 
-        interface createForwardingDevice {
-
-        }
-
-
-        def getVertexAll(graphService) {
-            println("EVENT | getVertexAll | STARTED");
-            for (Vertex v: graphService.V) {
-                println "ID: ${v.id} TYPE: ${v.type}"
-            }
-        }
-
-
-        def getNodes(def nodeindex, def type) {
-
-
-            def x = g.V[nodeindex].outE[[type: type]].inV.addr
-            println x
-        }
 
     }
